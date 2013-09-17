@@ -1,0 +1,8 @@
+[
+  {
+    "id": "save_srt",
+    "label": "Convert to SRT format",
+    "type": "bool",
+    "default": "false"
+  }
+]
