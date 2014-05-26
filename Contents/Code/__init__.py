@@ -24,7 +24,7 @@ def convertSubtitles(part, SaveSRT):
   subData = Core.storage.load(smiPath)
   subEncoding = chdet(subData)
   if subEncoding != 'Unknown':
-    Log('transcode from cp949')
+    Log('transcode to cp949')
     subData = unicode(subData, subEncoding, 'ignore').encode('cp949')
 
   # (2) split languages if needed
