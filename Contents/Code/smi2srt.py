@@ -112,12 +112,12 @@ class smiItem(object):
 def convertSMI(smi_sgml):
 	# skip to first starting tag (skip first 0xff 0xfe ...)
 	try:
-		fndx = smi_sgml.find('<SYNC')
+		fndx = smi_sgml.upper().find('<SYNC')
 	except Exception, e:
 		print chdt
 		raise e
 	if fndx < 0:
-		return False
+		return ''
 	smi_sgml = smi_sgml[fndx:]
 	lines = smi_sgml.split('\n')
 	
@@ -130,7 +130,7 @@ def convertSMI(smi_sgml):
 		linecnt += 1
 		sndx = line.upper().find('<SYNC')
 		if sndx >= 0:
-			m = re.compile(r'<sync\s+start\s*=\s*(\d+)>(.*)$', re.IGNORECASE).search(line)
+			m = re.compile(r'<sync\s+start\s*=\s*(\d+)\s*>(.*)$', re.IGNORECASE).search(line)
 			if not m:
 				raise Exception('Invalid format tag of <Sync start=nnnn> with "%s"' % line)
 			sync_cont += line[0:sndx]
