@@ -16,6 +16,7 @@ def convertSubtitles(part, SaveSRT):
   basePath = os.path.splitext(part.file)[0]
   smiPath = basePath+'.smi'
   if not os.path.exists(smiPath):
+    Log('%s not found!', smiPath)
     return False
 
   ext = '.smi'
@@ -41,7 +42,7 @@ def convertSubtitles(part, SaveSRT):
 
   # (4) save
   if not SaveSRT and subEncoding == 'Unknown':
-    return True	    # no need to save
+    return True  # no need to save
   if len(result) > 1:
     for lang, subData in result.iteritems():
       Core.storage.save(basePath+'.'+lang+ext, subData)
