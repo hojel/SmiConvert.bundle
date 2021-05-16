@@ -112,12 +112,12 @@ class smiItem(object):
 def convertSMI(smi_sgml):
 	# skip to first starting tag (skip first 0xff 0xfe ...)
 	try:
-		fndx = smi_sgml.find('<SYNC')
+		fndx = smi_sgml.upper().find('<SYNC')
 	except Exception, e:
 		print chdt
 		raise e
 	if fndx < 0:
-		return False
+		return ''
 	smi_sgml = smi_sgml[fndx:]
 	lines = smi_sgml.split('\n')
 	
@@ -130,20 +130,21 @@ def convertSMI(smi_sgml):
 		linecnt += 1
 		sndx = line.upper().find('<SYNC')
 		if sndx >= 0:
-			m = re.compile(r'<sync\s+start\s*=\s*(\d+)>(.*)$', re.IGNORECASE).search(line)
+			m = re.compile(r'<sync\s+start\s*=\s*(\d+)(\s+end\s*=\s*(\d+)|)\s*>(.*)$', re.IGNORECASE).search(line)
 			if not m:
-				raise Exception('Invalid format tag of <Sync start=nnnn> with "%s"' % line)
+				raise Exception('Invalid format tag of <Sync start=nnnn [end=nnnn]> with "%s"' % line)
 			sync_cont += line[0:sndx]
 			last_si = si
 			if last_si != None:
-				last_si.end_ms = long(m.group(1))
+				if(last_si.end_ms == 0): last_si.end_ms = long(m.group(1)) # fill end_ms with the current sync start time if no end tag was found in the last_si.
 				last_si.contents = sync_cont
 				srt_list.append(last_si)
 				last_si.linecount = linecnt
 				#print '[%06d] %s' % (linecnt, last_si)
-			sync_cont = m.group(2)
+			sync_cont = m.group(4)
 			si = smiItem()
 			si.start_ms = long(m.group(1))
+			if(m.group(3) is not None): si.end_ms = long(m.group(3)) # end tag has been found in the current_si
 		else:
 			sync_cont += line
 			

@@ -16,6 +16,7 @@ def convertSubtitles(part, SaveSRT):
   basePath = os.path.splitext(part.file)[0]
   smiPath = basePath+'.smi'
   if not os.path.exists(smiPath):
+    Log('%s not found!', smiPath)
     return False
 
   ext = '.smi'
@@ -24,8 +25,8 @@ def convertSubtitles(part, SaveSRT):
   subData = Core.storage.load(smiPath)
   subEncoding = chdet(subData)
   if subEncoding != 'Unknown':
-    Log('transcode to cp949')
-    subData = unicode(subData, subEncoding, 'ignore').encode('cp949')
+    Log('%s transcode to cp949', subEncoding)
+    subData = unicode(subData, subEncoding, 'ignore').encode('cp949', 'ignore')
 
   # (2) split languages if needed
   result = demuxSMI(subData)
@@ -41,7 +42,7 @@ def convertSubtitles(part, SaveSRT):
 
   # (4) save
   if not SaveSRT and subEncoding == 'Unknown':
-    return True	    # no need to save
+    return True  # no need to save
   if len(result) > 1:
     for lang, subData in result.iteritems():
       Core.storage.save(basePath+'.'+lang+ext, subData)
@@ -54,12 +55,6 @@ def chdet(aBuf):
   if aBuf[:3] == '\xEF\xBB\xBF':
     # EF BB BF  UTF-8 with BOM
     result = "UTF-8"
-  elif aBuf[:2] == '\xFF\xFE':
-    # FF FE  UTF-16, little endian BOM
-    result = "UTF-16LE"
-  elif aBuf[:2] == '\xFE\xFF':
-    # FE FF  UTF-16, big endian BOM
-    result = "UTF-16BE"
   elif aBuf[:4] == '\xFF\xFE\x00\x00':
     # FF FE 00 00  UTF-32, little-endian BOM
     result = "UTF-32LE"
@@ -72,6 +67,12 @@ def chdet(aBuf):
   elif aBuf[:4] == '\x00\x00\xFF\xFE':
     # 00 00 FF FE  UCS-4, unusual octet order BOM (2143)
     result = "X-ISO-10646-UCS-4-2143"
+  elif aBuf[:2] == '\xFF\xFE':
+    # FF FE  UTF-16, little endian BOM
+    result = "UTF-16LE"
+  elif aBuf[:2] == '\xFE\xFF':
+    # FE FF  UTF-16, big endian BOM
+    result = "UTF-16BE"
   else:
     result = "Unknown"
   return result
